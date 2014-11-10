@@ -14,7 +14,8 @@ defmodule Blitzy.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :httpoison]]
+    [mod: {Blitzy, []}, 
+     applications: [:logger, :httpoison]]
   end
 
   defp deps do

@@ -1,6 +1,10 @@
+require Logger
+
 defmodule Blitzy.Coordinator do
 
   def start(n_workers) do
+    Logger.info "[coordinator] started listening for #{n_workers} workers"
+    Process.register(self, __MODULE__)
     do_process_workers(n_workers, 0, empty_result)
   end
 

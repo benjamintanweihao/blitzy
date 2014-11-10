@@ -24,14 +24,28 @@ defmodule Blitzy.CLI do
   defp do_requests(url, n_requests) do
     Logger.info "Pummelling #{url} with #{n_requests} requests"
 
-    coord_task = Task.async(Coordinator, :start, [n_requests])
-    Process.register(coord_task.pid, Coordinator)
-  
-    Enum.map(1..n_requests, fn i -> 
-      spawn(Worker, :start, [url, i])         
+    Node.start(:"one@127.0.0.1")
+    Node.connect(:"two@127.0.0.1")
+
+    total_nodes = Enum.count(all_nodes)
+    requests_per_node = div(n_requests, total_nodes)
+    
+    tasks = all_nodes |> Enum.map(fn node -> 
+      Task.Supervisor.async({:coord_tasks_sup, node}, Coordinator, :start, [requests_per_node])
     end)
 
-    Task.await(coord_task, :infinity) |> parse_results
+    # this function needs to run on all the nodes.
+    Enum.each(all_nodes, fn node -> 
+      Enum.each(1..requests_per_node, fn i -> 
+        Node.spawn(node, Worker, :start, [url, i])         
+      end)
+    end)
+
+    # Await for all the coordinator tasks
+    tasks |> Enum.map(fn task ->
+      Task.await(task, :infinity) |> parse_results
+    end)
+
   end
 
   defp do_help do
@@ -57,6 +71,10 @@ defmodule Blitzy.CLI do
       Total time (msecs): #{total_time_elapsed}
       Avg time   (msecs): #{average_time}
     """
+  end
+
+  defp all_nodes do
+    [node | Node.list]
   end
 
 end
