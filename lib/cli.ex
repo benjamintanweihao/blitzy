@@ -6,48 +6,31 @@ defmodule Blitzy.CLI do
   alias Blitzy.Worker
 
   def main(args) do
-    # Start master node
-    Application.get_env(:blitz, :master_node) |> Node.start
-
-    # Start slave nodes
-    slave_nodes = Application.get_env(:blitz, :slave_nodes) |> Enum.filter(&Node.connect(&1))
-
-    args |> parse_args |> process_options([node|slave_nodes])
+    args |> parse_args |> process_options
   end
 
   defp parse_args(args) do
     OptionParser.parse(args, aliases: [n: :requests], strict: [requests: :integer])
   end
 
-  defp process_options(options, nodes) do
+  defp process_options(options) do
     case options do
       {[requests: n], [url], []} ->
-        do_requests(url, n, nodes)
+        do_requests(url, n)
       _ -> do_help
     end
   end
 
-  defp do_requests(url, n_requests, nodes) do
+  defp do_requests(url, n_requests) do
     Logger.info "Pummelling #{url} with #{n_requests} requests"
 
-    total_nodes = Enum.count(nodes)
-    requests_per_node = div(n_requests, total_nodes)
-    
-    tasks = nodes |> Enum.map(fn node -> 
-      Task.Supervisor.async({:coord_tasks_sup, node}, Coordinator, :start, [requests_per_node])
+    task = Task.async(Coordinator, :start, [n_requests])
+
+    Enum.each(1..n_requests, fn i -> 
+      spawn(Worker, :start, [url, i])         
     end)
 
-    # this function needs to run on all the nodes.
-    Enum.each(nodes, fn node -> 
-      Enum.each(1..requests_per_node, fn i -> 
-        Node.spawn(node, Worker, :start, [url, i])         
-      end)
-    end)
-
-    # Await for all the coordinator tasks
-    tasks |> Enum.map(fn task ->
-      Task.await(task, :infinity) |> parse_results
-    end)
+    Task.await(task, :infinity) |> parse_results
 
   end
 
