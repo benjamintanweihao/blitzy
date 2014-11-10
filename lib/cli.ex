@@ -27,7 +27,7 @@ defmodule Blitzy.CLI do
     task = Task.async(Coordinator, :start, [n_requests])
 
     Enum.each(1..n_requests, fn i -> 
-      spawn(Worker, :start, [url, i])         
+      Worker.start(url, i)         
     end)
 
     Task.await(task, :infinity) |> parse_results
