@@ -1,0 +1,2 @@
+defmodule Blitzy do
+end
