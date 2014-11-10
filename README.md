@@ -11,7 +11,7 @@ Inspired by this [post](http://www.watchsumo.com/posts/introduction-to-elixir-v1
 
 ## TODO
 
-- [ ] Initial implementation
+- [X] Initial implementation
 - [X] Command line
 - [ ] Distributed
 
