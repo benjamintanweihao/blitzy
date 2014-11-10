@@ -6,12 +6,12 @@ Blitzy - A simple HTTP load tester in Elixir
 Inspired by this [post](http://www.watchsumo.com/posts/introduction-to-elixir-v1-0-0-by-example-i) by Victor Martinez of WatchSumo.
 
 ```
-% ./blitz -n 100 http://www.example.com
+% ./blitzy -n 100 http://www.example.com
 ```
 
 ## TODO
 
 - [ ] Initial implementation
-- [ ] Command line 
+- [X] Command line
 - [ ] Distributed
 
