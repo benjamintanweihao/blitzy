@@ -4,7 +4,7 @@ defmodule Blitzy.Mixfile do
   def project do
     [app: :blitzy,
      version: "0.0.1",
-     elixir: "~> 1.0",
+     elixir: "~> 1.1-rc1",
      escript: escript,
      deps: deps]
   end
@@ -20,8 +20,8 @@ defmodule Blitzy.Mixfile do
 
   defp deps do
     [ 
-      {:httpoison, "~> 0.5"},
-      {:timex,     "~> 0.13.1"} 
+      {:httpoison, "~> 0.7"},
+      {:timex,     "~> 0.19"}
     ]
   end
 end
