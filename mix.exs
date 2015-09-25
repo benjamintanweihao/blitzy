@@ -4,7 +4,7 @@ defmodule Blitzy.Mixfile do
   def project do
     [app: :blitzy,
      version: "0.0.1",
-     elixir: "~> 1.1-rc1",
+     elixir: "~> 1.1",
      escript: escript,
      deps: deps]
   end
@@ -14,12 +14,12 @@ defmodule Blitzy.Mixfile do
   end
 
   def application do
-    [mod: {Blitzy, []}, 
+    [mod: {Blitzy, []},
      applications: [:logger, :httpoison]]
   end
 
   defp deps do
-    [ 
+    [
       {:httpoison, "~> 0.7"},
       {:timex,     "~> 0.19"}
     ]
