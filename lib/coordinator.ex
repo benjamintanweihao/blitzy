@@ -15,7 +15,7 @@ defmodule Blitzy.Coordinator do
   defp do_process_workers(n_workers, n_processed, result) do
     receive do
       {:ok, time_elapsed_in_msecs} ->
-        result = %{result | n_succeed: result.n_succeed + 1} 
+        result = %{result | n_succeed: result.n_succeed + 1}
         result = %{result | total_time_elapsed: result.total_time_elapsed + time_elapsed_in_msecs}
 
         do_process_workers(n_workers, n_processed + 1, result)

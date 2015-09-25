@@ -55,10 +55,10 @@ defmodule Blitzy.CLI do
     IO.puts """
       Usage:
         blitzy -n [requests] [url]
- 
+
       Options:
         -n, [--requests]      # Number of requests
- 
+
       Example:
         ./blitzy -n 100 http://www.example.com
     """
