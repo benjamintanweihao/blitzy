@@ -7,7 +7,8 @@ defmodule Blitzy.Supervisor do
 
   def init(:ok) do
     children = [
-      worker(Blitzy.Coordinator, [])
+      worker(Blitzy.Coordinator, []),
+      supervisor(Task.Supervisor, [[name: Blitzy.TasksSupervisors]])
     ]
 
     opts = [strategy: :one_for_one]

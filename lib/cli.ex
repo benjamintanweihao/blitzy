@@ -3,16 +3,19 @@ require Logger
 defmodule Blitzy.CLI do
 
   alias Blitzy.Coordinator
-  alias Blitzy.Worker
+  alias Blitzy.WorkerTasks
 
   def main(args) do
     # Start master node
-    Application.get_env(:blitz, :master_node) |> Node.start
+    Application.get_env(:blitzy, :master_node) |> Node.start
 
     # Start slave nodes
-    slave_nodes = Application.get_env(:blitz, :slave_nodes) |> Enum.filter(&Node.connect(&1))
+    slave_nodes = Application.get_env(:blitzy, :slave_nodes)
+                  |> Enum.filter(&Node.connect(&1))
 
-    args |> parse_args |> process_options([node|slave_nodes])
+    args
+    |> parse_args
+    |> process_options([node|slave_nodes])
   end
 
   defp parse_args(args) do
@@ -23,31 +26,27 @@ defmodule Blitzy.CLI do
     case options do
       {[requests: n], [url], []} ->
         do_requests(url, n, nodes)
-      _ -> do_help
+
+      _ ->
+        do_help
+
     end
   end
 
   defp do_requests(url, n_requests, nodes) do
     Logger.info "Pummelling #{url} with #{n_requests} requests"
 
-    total_nodes = Enum.count(nodes)
-    requests_per_node = div(n_requests, total_nodes)
-    
-    tasks = nodes |> Enum.map(fn node -> 
-      Task.Supervisor.async({:coord_tasks_sup, node}, Coordinator, :start, [requests_per_node])
+    total_nodes  = Enum.count(nodes)
+    req_per_node = div(n_requests, total_nodes)
+
+    tasks = nodes |> Enum.map(fn node ->
+      Task.Supervisor.async({WorkerTasks, node}, Coordinator, :run, [req_per_node, url])
     end)
 
-    # this function needs to run on all the nodes.
-    Enum.each(nodes, fn node -> 
-      Enum.each(1..requests_per_node, fn i -> 
-        Node.spawn(node, Worker, :start, [url, i])         
-      end)
-    end)
-
-    # Await for all the coordinator tasks
-    tasks |> Enum.map(fn task ->
-      Task.await(task, :infinity) |> parse_results
-    end)
+    tasks
+    |> Enum.map(&Task.await(&1, :infinity))
+    |> Enum.flatten
+    |> parse_results
 
   end
 
@@ -65,15 +64,8 @@ defmodule Blitzy.CLI do
     System.halt(0)
   end
 
-  defp parse_results(%{n_fail: n_fail, n_succeed: n_succeed, total_time_elapsed: total_time_elapsed}) do
-    average_time = total_time_elapsed / n_succeed
-
-    IO.puts """
-      Succeeded         : #{n_succeed}
-      Failures          : #{n_fail}
-      Total time (msecs): #{total_time_elapsed}
-      Avg time   (msecs): #{average_time}
-    """
+  defp parse_results(results) do
+    IO.inspect results
   end
 
 end

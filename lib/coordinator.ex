@@ -1,35 +1,37 @@
 require Logger
 
 defmodule Blitzy.Coordinator do
+  use GenServer
 
-  def start(n_workers) do
-    Logger.info "[coordinator] started listening for #{n_workers} workers"
-    Process.register(self, __MODULE__)
-    do_process_workers(n_workers, 0, empty_result)
+  alias Blitzy.Worker
+
+  #######
+  # API #
+  #######
+
+  def start_link do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
-  defp do_process_workers(n_workers, n_workers, result) do
-    result
+  def run(n_workers, url) do
+    GenServer.call(__MODULE__, {:run, n_workers, url})
   end
 
-  defp do_process_workers(n_workers, n_processed, result) do
-    receive do
-      {:ok, time_elapsed_in_msecs} ->
-        result = %{result | n_succeed: result.n_succeed + 1}
-        result = %{result | total_time_elapsed: result.total_time_elapsed + time_elapsed_in_msecs}
+  #############
+  # Callbacks #
+  #############
 
-        do_process_workers(n_workers, n_processed + 1, result)
-
-      {:error, :timeout} ->
-        do_process_workers(n_workers, n_processed + 1, %{result | n_fail: result.n_fail + 1})
-
-      {:error, :unknown} ->
-        do_process_workers(n_workers, n_processed + 1, %{result | n_fail: result.n_fail + 1})
-    end
+  def init(:ok) do
+    {:ok, {}}
   end
 
-  defp empty_result do
-    %{n_succeed: 0, n_fail: 0, total_time_elapsed: 0}
+  def handle_call({:run, n_workers, url}, _from, state) when n_workers > 0 do
+    result =
+      1..n_workers
+      |> Enum.map(fn _ -> Task.async(Worker, :start, [url]) end)
+      |> Enum.map(&(Task.await(&1, :infinity)))
+
+    {:reply, state, result}
   end
 
 end

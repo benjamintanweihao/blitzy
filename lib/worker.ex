@@ -1,28 +1,21 @@
-require Logger
-
 defmodule Blitzy.Worker do
   use Timex
 
-  alias Blitzy.Coordinator
-
-  def start(url, id) do
+  def start(url) do
     {timestamp, response} = Time.measure(fn -> HTTPoison.get(url) end)
-    send(Coordinator, handle_response({Time.to_msecs(timestamp), response}, id))
+    handle_response({Time.to_msecs(timestamp), response})
   end
 
-  defp handle_response({msecs, {:ok, %HTTPoison.Response{status_code: code}}}, id)
+  defp handle_response({msecs, {:ok, %HTTPoison.Response{status_code: code}}})
   when code >= 200 and code <= 304 do
-    Logger.info "worker [#{node}-#{id}] completed in #{msecs} msecs"
     {:ok, msecs}
   end
 
-  defp handle_response({_msecs, {:error, %HTTPoison.Error{reason: :connect_timeout}}}, id) do
-    Logger.info "worker [#{node}-#{id}] timed out"
-    {:error, :timeout}
+  defp handle_response({_msecs, {:error, reason}}) do
+    {:error, reason}
   end
 
-  defp handle_response({_msecs, _response}, id) do
-    Logger.info "worker [#{node}-#{id}] errored out"
+  defp handle_response({_msecs, _}) do
     {:error, :unknown}
   end
 
