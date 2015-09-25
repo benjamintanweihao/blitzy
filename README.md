@@ -6,7 +6,7 @@ Blitzy - A simple HTTP load tester in Elixir
 Inspired by this [post](http://www.watchsumo.com/posts/introduction-to-elixir-v1-0-0-by-example-i) by Victor Martinez of WatchSumo.
 
 ```
-% ./blitzy -n 100 http://www.example.com
+% ./blitzy -n 100 http://www.bieberfever.com
 ```
 
 ## Distributed Blitzy
@@ -32,7 +32,7 @@ Start up a couple of nodes, and name them accordingly. For example, here's how t
 Now, when you run the the command
 
 ```
-% ./blitzy -n 100 http://www.example.com
+% ./blitzy -n 100 http://www.bieberfever.com
 ```
 
 the requests will be split across the number of nodes you created, including the master node. Here's an example run:
@@ -63,4 +63,11 @@ the requests will be split across the number of nodes you created, including the
   Total time (msecs): 485414.8010000001
   Avg time   (msecs): 1457.7021051051054
 ```
+
+## Building the Executable
+
+```
+mix escript.build
+```
+
 
