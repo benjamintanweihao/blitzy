@@ -1,14 +1,11 @@
-require Logger
-
 defmodule Blitzy.CLI do
   alias Blitzy.TasksSupervisor
+  require Logger
 
   def main(args) do
-    # Start master node
     Application.get_env(:blitzy, :master_node)
       |> Node.start
 
-    # Start slave nodes
     Application.get_env(:blitzy, :slave_nodes)
       |> Enum.each(&Node.connect(&1))
 
@@ -85,7 +82,7 @@ defmodule Blitzy.CLI do
     IO.puts """
     Total workers    : #{total_workers}
     Successful reqs  : #{total_success}
-    Failed res       : #{total_failure}
+    Failed reqs      : #{total_failure}
     Average (msecs)  : #{average_time}
     Longest (msecs)  : #{longest_time}
     Shortest (msecs) : #{shortest_time}
