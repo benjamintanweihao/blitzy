@@ -20,8 +20,8 @@ defmodule Blitzy.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 0.7"},
-      {:timex,     "~> 0.19"}
+      {:httpoison, "~> 0.9.2"},
+      {:timex,     "~> 3.0.8"}
     ]
   end
 end
