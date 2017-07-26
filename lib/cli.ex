@@ -11,7 +11,7 @@ defmodule Blitzy.CLI do
 
     args
       |> parse_args
-      |> process_options([node|Node.list])
+      |> process_options([node()|Node.list])
   end
 
   defp parse_args(args) do
@@ -25,7 +25,7 @@ defmodule Blitzy.CLI do
         do_requests(n, url, nodes)
 
       _ ->
-        do_help
+        do_help()
 
     end
   end
